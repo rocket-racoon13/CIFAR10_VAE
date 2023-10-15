@@ -3,6 +3,7 @@ from tqdm import tqdm
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
@@ -42,8 +43,10 @@ class Tester:
             for step, batch in enumerate(test_loader, 1):
                 batch = [b.to(self.device) for b in batch]
                 image, _ = batch
-                y_pred = self.model(image)
-                loss = self.loss_func(y_pred, image)
+                y_pred, mu, logvar = self.model(image)
+                
+                kl_divergence = 0.5 * torch.sum(-1 - logvar + mu.pow(2) + logvar.exp())
+                loss = F.binary_cross_entropy(y_pred, image) + kl_divergence
                 self.loss += loss.detach().cpu().item()
                 
         self.loss /= len(self.test_ds)
@@ -61,7 +64,7 @@ class Tester:
         for batch in test_loader:
             batch = [b.to(self.device) for b in batch]
             image, _ = batch
-            outputs = self.model(image)
+            outputs, mu, logvar = self.model(image)
             outputs = outputs.view(outputs.size(0), 3, 32, 32).detach().cpu().data
             save_image(
                 tensor=image,

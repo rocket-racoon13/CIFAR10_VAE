@@ -5,9 +5,8 @@ from torch.utils.data import DataLoader
 
 from dataset import *
 from data_utils import *
-from model import AutoEncoder
+from model import VAE
 from model_utils import *
-from predictor import *
 from tester import *
 from trainer import *
 from utils import *
@@ -20,7 +19,7 @@ def config():
     
     parser.add_argument("--data_dir", type=str, default="dataset/cifar10")
     parser.add_argument("--save_dir", type=str, default=f"outputs/{datetime.now().strftime('%Y%m%d_%H-%M-%S')}/ckpt")
-    parser.add_argument("--model_name", type=str, default="best-model.ckpt")
+    parser.add_argument("--model_name", type=str)
     
     parser.add_argument('--image_width', type=int, default=32)
     parser.add_argument('--image_height', type=int, default=32)
@@ -33,8 +32,9 @@ def config():
     parser.add_argument('--kernel_size', type=list, default=[3, 3])
     parser.add_argument('--enc_stride', type=int, default=[1, 1])
     parser.add_argument('--dec_stride', type=int, default=[1, 1])
-    parser.add_argument('--enc_padding', type=list, default=[0, 0])
-    parser.add_argument('--dec_padding', type=list, default=[0, 0])
+    parser.add_argument('--enc_padding', type=list, default=[1, 1])
+    parser.add_argument('--dec_padding', type=list, default=[1, 1])
+    parser.add_argument('--latent_dim', type=int, default=256)
     
     parser.add_argument('--num_epochs', type=int, default=5)
     parser.add_argument('--train_batch_size', type=int, default=100)
@@ -74,7 +74,7 @@ def main(args):
     test_ds = CIFAR10Dataset(args, train=False, transform=Normalize(args.norm_mean, args.norm_stdev))
 
     # create model, optimizer, scheduler
-    model = AutoEncoder(args).to(device)
+    model = VAE(args).to(device)
     optimizer = get_optimizer(args, model)
     scheduler = get_scheduler(args, optimizer)
     
