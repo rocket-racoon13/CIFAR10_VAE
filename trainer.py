@@ -100,7 +100,7 @@ class Trainer:
                 image, _ = batch
                 y_pred, mu, logvar = self.model(image)
                 
-                kl_divergence = 0.5 * torch.sum(-1 - logvar + mu.pow(2) + logvar.exp())
+                kl_divergence = 0.5 * torch.sum(mu.pow(2) + logvar.exp() - 1 - logvar)
                 loss = F.binary_cross_entropy(y_pred, image) + kl_divergence
                 
                 self.optimizer.zero_grad()

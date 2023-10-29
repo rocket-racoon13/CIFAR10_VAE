@@ -14,6 +14,7 @@ class Tester:
     def __init__(
         self,
         args,
+        train_ds,
         test_ds,
         model,
         optimizer,
@@ -72,5 +73,5 @@ class Tester:
             )
             save_image(
                 tensor=outputs,
-                fp=os.path.join(self.args.save_dir, 'cifat10_pred_images.png'))
+                fp=os.path.join(self.args.save_dir, 'cifar10_pred_images.png'))
             break
